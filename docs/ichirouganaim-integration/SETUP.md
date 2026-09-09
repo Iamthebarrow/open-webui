@@ -136,7 +136,7 @@ services:
     image: open-webui-claude-cli:local
     depends_on: !reset []
     environment:
-      WEBUI_SECRET_KEY: '<a fixed secret, see below>'
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?set WEBUI_SECRET_KEY in .env}
       CLAUDE_CONFIG_DIR: /app/backend/data/claude-cli-home
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -144,15 +144,20 @@ services:
 
 - **`build`/`image`** — required. Without this, `docker compose` pulls the
   bare upstream image with no `claude` CLI, no Node, none of it.
-- **`WEBUI_SECRET_KEY`** — **generate your own** with
-  `openssl rand -base64 32`; don't reuse the value currently checked into
-  this repo's copy of the file (if it's been committed anywhere, treat it
-  as already-compromised and rotate it). Setting a fixed value here matters
-  for reasons that aren't obvious: left unset, open-webui auto-generates
-  one on first boot and writes it to a file *inside the container's own
-  writable layer*, not the persistent data volume — so it silently
-  regenerates on every container recreation (every rebuild), invalidating
-  every existing login session each time. A fixed value avoids that.
+- **`WEBUI_SECRET_KEY`** — the compose file no longer holds the value; it
+  reads `${WEBUI_SECRET_KEY}` from a `.env` file in the same directory
+  (`.env` is gitignored, `.env.example` documents the key). Copy
+  `.env.example` to `.env` and set your own value with
+  `openssl rand -base64 32`. Compose fails to start with the `:?` message
+  if `.env` is missing or the key is blank. Any secret that was previously
+  committed inline in this repo's copy of the file should be treated as
+  already-compromised and rotated. Setting a *fixed* value (rather than
+  leaving it unset) matters for reasons that aren't obvious: left unset,
+  open-webui auto-generates one on first boot and writes it to a file
+  *inside the container's own writable layer*, not the persistent data
+  volume — so it silently regenerates on every container recreation (every
+  rebuild), invalidating every existing login session each time. A fixed
+  value in `.env` avoids that.
 - **`CLAUDE_CONFIG_DIR`** — required, leave as-is. Redirects the `claude`
   CLI's own credential/session storage into the already-persistent
   `open-webui:/app/backend/data` volume, so `claude auth login` (step 6)

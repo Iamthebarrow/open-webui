@@ -314,3 +314,4 @@ cypress/screenshots
 
 # Miscellaneous
 /untracked
+*.tar.zst

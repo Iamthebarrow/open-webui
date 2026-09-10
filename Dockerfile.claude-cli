@@ -39,7 +39,7 @@ ENV APP_BUILD_HASH=${BUILD_HASH}
 # needing more heap than fits; if it instead gets OS-killed outright, that
 # confirms the surrounding VM itself doesn't have enough real memory,
 # independent of this setting. See decisions.md for what actually happened.
-ENV NODE_OPTIONS="--max-old-space-size=3072"
+ENV NODE_OPTIONS="--max-old-space-size=6144"
 RUN npm run build
 
 FROM ghcr.io/open-webui/open-webui:main
